@@ -8,18 +8,18 @@ A multimodal machine learning application that detects Parkinson's Disease and c
 
 📌 Table of Contents
 
-- [Overview]
-- [How It Works]
-- [Datasets]
-- [Model Architecture]
-- [Stages of Parkinson's]
-- [Project Structure]
-- [Results]
-- [Installation]
-- [Usage]
-- [Streamlit App]
-- [Contributing]
-- [License]
+- Overview
+- How It Works
+- Datasets
+- Model Architecture
+- Stages of Parkinson's
+- Project Structure
+- Results
+- Installation
+- Usage
+- Streamlit App
+- Contributing
+- License
 
 🔍 Overview
 
