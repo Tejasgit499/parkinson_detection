@@ -8,16 +8,16 @@ warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  CONFIGURATION — adjust these to match your exact training settings
+#  CONFIGURATION SETTINGS
 # ══════════════════════════════════════════════════════════════════════════════
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
-IMG_SIZE  = 128      # Must match CNN training input size (e.g. 128 or 224)
-N_MFCC    = 40       # ✅ FIX: was 65 in old app, must be 40 to match RNN training
+IMG_SIZE  = 128     
+N_MFCC    = 40       
 N_FRAMES  = 130      # Timesteps used during RNN training
 SR        = 22050    # Sample rate used during training
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  PAGE CONFIG
+#  PAGE CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="Parkinson's Disease Detection System",
@@ -329,7 +329,7 @@ st.markdown("""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  MODEL LOADING  ✅ FIXED: correct filenames + keras loading
+#  MODEL LOADING  
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_resource(show_spinner=False)
 def load_models():
@@ -348,7 +348,7 @@ def load_models():
         else:
             missing.append(fname)
 
-    # ── CNN model — try .keras first, fall back to .pkl ───────────────────
+    
     cnn_keras = os.path.join(BASE_DIR, 'cnn_modelfinal.keras')
     cnn_pkl   = os.path.join(BASE_DIR, 'cnn_model.pkl')
     if os.path.exists(cnn_keras):
@@ -382,7 +382,7 @@ def load_models():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  PREPROCESSING — fixed to match training pipelines
+#  PREPROCESSING 
 # ══════════════════════════════════════════════════════════════════════════════
 def preprocess_image(uploaded_file):
     """
@@ -405,7 +405,7 @@ def preprocess_image(uploaded_file):
     normalized = resized.astype(np.float32) / 255.0
 
     # ── INVERSION FLAG ─────────────────────────────────────────────────────
-    # If during training your images had WHITE spirals on BLACK background,
+    # If during training the images had WHITE spirals on BLACK background,
     # uncomment the line below. (Common with OpenCV-loaded handwriting images)
     # normalized = 1.0 - normalized
     # ───────────────────────────────────────────────────────────────────────
@@ -457,7 +457,7 @@ def run_prediction(models, img_input=None, audio_input=None):
     """
     cnn_prob = rnn_prob = fusion_prob = None
 
-    # ── CNN ────────────────────────────────────────────────────────────────
+    # CNN 
     if img_input is not None and 'cnn' in models:
         try:
             raw = models['cnn'].predict(img_input, verbose=0)   # (1, N_classes)
@@ -470,7 +470,7 @@ def run_prediction(models, img_input=None, audio_input=None):
         except Exception as e:
             st.warning(f"CNN error: {e}")
 
-    # ── RNN ────────────────────────────────────────────────────────────────
+    # RNN 
     if audio_input is not None and 'rnn' in models:
         try:
             raw = models['rnn'].predict(audio_input, verbose=0)  # (1, N_classes)
@@ -482,7 +482,7 @@ def run_prediction(models, img_input=None, audio_input=None):
         except Exception as e:
             st.warning(f"RNN error: {e}")
 
-    # ── FUSION ─────────────────────────────────────────────────────────────
+    # FUSION 
     if cnn_prob is not None and rnn_prob is not None and 'fusion' in models:
         # Strategy 1: pass concatenated probabilities → (1, 4)
         try:
@@ -560,11 +560,11 @@ def render_stage_bar(label_icon, label, color, bg_color, pct):
 #  MAIN UI
 # ══════════════════════════════════════════════════════════════════════════════
 def main():
-    # ── Load models ──────────────────────────────────────────────────────────
+    # Loading the models
     with st.spinner("Loading models…"):
         models, missing = load_models()
 
-    # ── Hero ─────────────────────────────────────────────────────────────────
+    # Hero
     st.markdown("""
     <div class="hero">
       <div class="hero-eyebrow">🧠 &nbsp; AI-Powered Neurological Screening</div>
@@ -579,7 +579,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Model status banner ───────────────────────────────────────────────────
+    # Model status banner
     loaded_names = [n.upper() for n in models if n != 'config']
     if loaded_names:
         st.markdown(f"""
@@ -596,7 +596,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ── Input Section ─────────────────────────────────────────────────────────
+    # Input Section
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
@@ -653,13 +653,13 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ── Analyse Button ────────────────────────────────────────────────────────
+    # Analyse Button
     st.markdown("<br>", unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         run_analysis = st.button("🔬  ANALYSE NOW", key="analyse_btn")
 
-    # ── Results ───────────────────────────────────────────────────────────────
+    # Results 
     if run_analysis:
         if not img_file and not audio_file:
             st.warning("⚠️  Please upload at least one input (image or audio).")
@@ -701,7 +701,7 @@ def main():
             st.error("❌ Could not generate a prediction. Check model files and inputs.")
             return
 
-        # ── Primary result ────────────────────────────────────────────
+        # Primary Goal Result
         parkinson_conf = float(fusion_prob[1]) if len(fusion_prob) >= 2 else float(fusion_prob[0])
         healthy_conf   = 1.0 - parkinson_conf
         is_healthy     = healthy_conf >= 0.5
@@ -726,7 +726,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
 
-        # ── Confidence metrics ────────────────────────────────────────
+        # Metrics consideration
         m1, m2, m3 = st.columns(3)
 
         with m1:
@@ -776,7 +776,7 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
 
-        # ── Stage probability bars ────────────────────────────────────
+        #  Stage probability bars
         st.markdown("""
         <div class="stage-card">
           <div class="stage-card-title">📊 &nbsp; Stage Probability Distribution</div>
@@ -788,7 +788,7 @@ def main():
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # ── Medical disclaimer ────────────────────────────────────────
+        # Medical disclaimer
         st.markdown("""
         <div class="disclaimer">
           <strong>⚠️ Medical Disclaimer:</strong> This tool is intended for
@@ -801,7 +801,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ── Footer ────────────────────────────────────────────────────────────────
+    # Footer
     st.markdown("""
     <div class="app-footer">
       Built with &nbsp; TensorFlow &nbsp;·&nbsp; Keras &nbsp;·&nbsp; Streamlit
