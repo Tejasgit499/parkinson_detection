@@ -1,3 +1,5 @@
+//Installing dependencies
+
 import streamlit as st
 import numpy as np
 import pickle, os, cv2, librosa, tempfile, warnings
@@ -388,10 +390,11 @@ def preprocess_image(uploaded_file):
     """
     ✅ FIX: Preprocess spiral image exactly as during CNN training.
     Key changes vs old code:
+      - Normalization and resizing of images
       - Explicit grayscale conversion
       - Correct resize and normalization
       - Proper channel/batch dimensions
-    """
+
     img = Image.open(uploaded_file).convert('RGB')
     img_arr = np.array(img)
 
@@ -415,12 +418,12 @@ def preprocess_image(uploaded_file):
 
 
 def extract_audio_features(audio_path):
-    """
+    
     ✅ FIX 1: Use N_MFCC=40 (was 65) to match RNN training dimensions.
     ✅ FIX 2: Pad/trim to exactly N_FRAMES timesteps.
     ✅ FIX 3: Normalize features before feeding to LSTM.
     Returns shape: (1, N_FRAMES, N_MFCC) = (1, 130, 40)
-    """
+    
     y, sr = librosa.load(audio_path, sr=SR, mono=True)
 
     # Extract MFCCs — shape: (N_MFCC, T)
@@ -447,14 +450,14 @@ def extract_audio_features(audio_path):
 #  PREDICTION ENGINE
 # ══════════════════════════════════════════════════════════════════════════════
 def run_prediction(models, img_input=None, audio_input=None):
-    """
-    ✅ FIX: Correct fusion pipeline.
+    
+    Fusion Pipeline
     Old code fed raw MFCC (1,130,65) → fusion.  Now we:
       1. Get CNN probability vector  → (1, 2)
       2. Get RNN probability vector  → (1, 2)
       3. Concatenate probabilities   → (1, 4)  and feed to fusion model
          OR extract penultimate features if fusion expects (1, 64)
-    """
+    
     cnn_prob = rnn_prob = fusion_prob = None
 
     # CNN 
