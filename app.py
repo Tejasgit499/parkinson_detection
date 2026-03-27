@@ -1,4 +1,4 @@
-//Installing dependencies
+// Dependencies needed for Project
 
 import streamlit as st
 import numpy as np
@@ -394,6 +394,8 @@ def preprocess_image(uploaded_file):
       - Explicit grayscale conversion
       - Correct resize and normalization
       - Proper channel/batch dimensions
+      - Scaling of the factors
+      
 
     img = Image.open(uploaded_file).convert('RGB')
     img_arr = np.array(img)
